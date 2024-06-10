@@ -199,3 +199,5 @@ on
 ORDER BY 
 	z.state_code, z.zip_code;
 ```
+![image](https://github.com/HimanshuBaswal/Census-High_School_SQL-Project/assets/74957804/c40f2ec9-f48b-458f-b845-7a94e1957d8f)
+
