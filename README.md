@@ -133,6 +133,27 @@ GROUP BY income_range;
 #### 5) Intermediate Challenge :
 - Determine if students perform better on the math or reading exam on average.
 - Find the number of states where students perform better in math exams compared to reading exams, and vice versa.
+```sh
+WITH avg_exam_scores AS (
+  SELECT
+  state_code,
+  AVG(SAFE_CAST(pct_proficient_math AS INT64)) AS avg_math_pct,
+  AVG(SAFE_CAST(pct_proficient_reading AS INT64)) AS avg_reading_pct,
+  CASE 
+    WHEN AVG(SAFE_CAST(pct_proficient_math AS INT64)) > AVG(SAFE_CAST(pct_proficient_reading AS INT64)) THEN 'Math'
+    WHEN AVG(SAFE_CAST(pct_proficient_math AS INT64)) < AVG(SAFE_CAST(pct_proficient_reading AS INT64)) THEN 'Reading'
+    ELSE 'No Exam Data'
+  END AS Higher_Performance_In,
+  FROM `stoked-producer-388612.12.public_hs`
+  GROUP BY state_code
+)
+
+SELECT Higher_Performance_In,
+COUNT(*) AS number_of_states
+FROM avg_exam_scores
+GROUP BY Higher_Performance_In;
+```
+![image](https://github.com/HimanshuBaswal/Census-High_School_SQL-Project/assets/74957804/5fa0b04c-ddc9-4a88-8e10-ccc2314f3134)
 
 - *Hint*: Use the WITH clause to create a temporary table of average exam scores for each state, including a column indicating whether the math or reading average is higher. Include an option for "No Exam Data" for states without standardized assessments.
 
