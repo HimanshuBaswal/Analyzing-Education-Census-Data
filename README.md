@@ -163,3 +163,39 @@ GROUP BY Higher_Performance_In;
 - Note: Exam standards may vary by state, so limit comparisons within states. Some states may not have exams.
 
 - *Hint*: Use the WITH clause to create a temporary table of exam score statistics for each state (e.g., min/max/avg) and then join it to each zip-code level data for comparison.
+```sh
+WITH zip_code_averages AS (
+	SELECT 
+		zip_code,
+		state_code,
+    	AVG(SAFE_CAST(pct_proficient_math AS FLOAT64)) as zip_avg_math, 
+    	AVG(SAFE_CAST(pct_proficient_reading AS FLOAT64)) as zip_avg_reading
+	FROM `stoked-producer-388612.12.public_hs`
+	GROUP BY zip_code, state_code
+), 
+state_averages AS (
+	SELECT 
+  		state_code,
+  		AVG(SAFE_CAST(pct_proficient_math AS FLOAT64)) as state_avg_math, 
+  		AVG(SAFE_CAST(pct_proficient_reading AS FLOAT64)) as state_avg_reading
+	FROM `stoked-producer-388612.12.public_hs`
+	group by state_code
+)
+SELECT
+	z.zip_code,
+    z.state_code,
+    z.zip_avg_math,
+    z.zip_avg_reading,
+    s.state_avg_math,
+    s.state_avg_reading,
+    (z.zip_avg_math - s.state_avg_math) AS math_proficiency_diff,
+    (z.zip_avg_reading - s.state_avg_reading) AS reading_proficiency_diff
+FROM 
+	zip_code_averages z
+JOIN 
+	state_averages s
+on 
+	z.state_code = s.state_code
+ORDER BY 
+	z.state_code, z.zip_code;
+```
