@@ -5,6 +5,7 @@
 
 ## Tools Used
 - Google Big Query
+- SQliteonline
 
 ## Project Tasks
 
@@ -102,9 +103,32 @@ GROUP BY state_code;
 #### 4) Joint Analysis :
 - Join tables to analyze further.
 - Investigate if characteristics of the zip-code area, such as median household income, influence students' performance in high school.
+```sh
+WITH income_ranges AS (
+  SELECT
+    h.school_id,
+    l.zip_code,
+    l.median_household_income,
+    CASE 
+        WHEN SAFE_CAST(l.median_household_income AS INT64) < 50000 THEN '<$50K'
+        WHEN SAFE_CAST(l.median_household_income AS INT64) BETWEEN 50000 AND 100000 THEN '<$50K-$100K'
+        ELSE '>$100K'
+    END AS income_range,
+    h.pct_proficient_math,
+    h.pct_proficient_reading
+  FROM `stoked-producer-388612.12.census_data` l 
+  JOIN `stoked-producer-388612.12.public_hs` h ON l.zip_code = h.zip_code
+)
 
-
+SELECT 
+  income_range,
+  AVG(SAFE_CAST(pct_proficient_math AS INT64)) AS pct_proficient_math,
+  AVG(SAFE_CAST(pct_proficient_reading AS INT64)) AS pct_proficient_reading
+FROM income_ranges
+GROUP BY income_range;
+```
 - *Hint*: Use the CASE statement to divide median_household_income into income ranges (e.g., <$50k, $50k-$100k, $100k+) and find the average exam scores for each range.
+![image](https://github.com/HimanshuBaswal/Census-High_School_SQL-Project/assets/74957804/6455f038-f5f1-445b-a0fa-46599697c673)
 
 #### 5) Intermediate Challenge :
 - Determine if students perform better on the math or reading exam on average.
